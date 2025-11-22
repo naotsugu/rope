@@ -22,6 +22,38 @@ public class Rope {
         this.root = (text == null || text.isEmpty()) ? Node.EMPTY : new Node.Leaf(text);
     }
 
+    public Rope insert(int index, String str) {
+        if (str.isEmpty()) return this;
+
+        // split existing rope
+        Rope[] parts = split(index);
+        Rope leftPart = parts[0];
+        Rope rightPart = parts[1];
+
+        // concatenate (concatenate handles balancing)
+        Rope insertRope = new Rope(str);
+        return leftPart.concat(insertRope).concat(rightPart);
+    }
+
+    public Rope delete(int start, int end) {
+        if (start < 0 || end > root.totalLength() || start > end) {
+            throw new IndexOutOfBoundsException("Invalid range for deletion.");
+        }
+        if (start == end) return this;
+
+        // split at start
+        Rope[] parts1 = split(start);
+        Rope leftPart = parts1[0];
+        Rope rightPartAndDeleted = parts1[1];
+
+        // split the second part at (end - start) to get the final right part
+        Rope[] parts2 = rightPartAndDeleted.split(end - start);
+        Rope retainedRightPart = parts2[1];
+
+        // concatenate the two retained parts (concatenate handles balancing)
+        return leftPart.concat(retainedRightPart);
+    }
+
     public Rope concat(Rope that) {
         if (this.root.isEmpty()) return that;
         if (that.root.isEmpty()) return this;
@@ -71,7 +103,7 @@ public class Rope {
         String leftText  = leaf.text().substring(0, index);
         String rightText = leaf.text().substring(index);
 
-        Node leftPart  = leftText.isEmpty() ? Node.EMPTY : new Leaf(leftText);
+        Node leftPart  = leftText.isEmpty()  ? Node.EMPTY : new Leaf(leftText);
         Node rightPart = rightText.isEmpty() ? Node.EMPTY : new Leaf(rightText);
         return new Node[] { leftPart, rightPart };
     }
@@ -79,16 +111,34 @@ public class Rope {
     private Node[] splitNode(Branch node, int index) {
 
         if (index < node.length()) {
+
+            //      A        ->        A       /
+            //    /   \              /   \    /
+            //   B   node           B   node /         ->               rightPart
+            //       /   \               /  /    \                       /  \
+            //      D     E             D  /      E         leftPart    G    E
+            //     / \   / \          /   /   \   / \         /             / \
+            //     F  G  H  I        F   /     G  H  I       F              H  I
+
             // split point is in the left subtree
             Node[] leftSplit = splitNode(node.left(), index);
 
             Node leftPart = leftSplit[0];
-            // new right part: Split-right-of-left + original right (shared)
+            // new right part: split-right-of-left + original right (shared)
             Node rightPart = balance.apply(new Branch(leftSplit[1], node.right()));
 
             return new Node[] { leftPart, rightPart };
 
         } else {
+
+            //      A        ->        A
+            //    /   \              /   \
+            //   B     C            B     C       /    ->      leftPart
+            //       /   \              /   \    /               /  \
+            //      D     E            D        /   E           D    H    rightPart
+            //     / \   / \          / \   /  /     \         / \            \
+            //     F  G  H  I        F   G  H /       I       F   G            I
+
             // split point is in the right subtree
             int rightIndex = index - node.length();
             Node[] rightSplit = splitNode(node.right(), rightIndex);
@@ -101,39 +151,6 @@ public class Rope {
             return new Node[] { leftPart, rightPart };
 
         }
-    }
-
-    public Rope insert(int index, String str) {
-        if (str.isEmpty()) return this;
-
-        // split existing Rope
-        Rope[] parts = this.split(index);
-        Rope leftPart = parts[0];
-        Rope rightPart = parts[1];
-
-        // concatenate (concatenate handles balancing)
-        Rope insertRope = new Rope(str);
-        Rope temp = leftPart.concat(insertRope);
-        return temp.concat(rightPart);
-    }
-
-    public Rope delete(int start, int end) {
-        if (start < 0 || end > root.totalLength() || start > end) {
-            throw new IndexOutOfBoundsException("Invalid range for deletion.");
-        }
-        if (start == end) return this;
-
-        // split at start
-        Rope[] parts1 = split(start);
-        Rope leftPart = parts1[0];
-        Rope rightPartAndDeleted = parts1[1];
-
-        // split the second part at (end - start) to get the final right part
-        Rope[] parts2 = rightPartAndDeleted.split(end - start);
-        Rope retainedRightPart = parts2[1];
-
-        // concatenate the two retained parts (concatenate handles balancing)
-        return leftPart.concat(retainedRightPart);
     }
 
     @Override

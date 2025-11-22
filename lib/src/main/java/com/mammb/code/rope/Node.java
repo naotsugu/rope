@@ -1,5 +1,18 @@
 package com.mammb.code.rope;
 
+/**
+ * Each node further up the tree holds the sum of the lengths of all the leaves in its left subtree.
+ * <pre>
+ *               Branch
+ *                (5)
+ *              /     \
+ *     Branch (3)      (1) Branch
+ *          /   \     /
+ *        (3)   (2)  (1)
+ *       Leaf  Leaf  Leaf
+ *      |abc|  |de|  |f|
+ * </pre>
+ */
 sealed interface Node {
 
     Node EMPTY = new Leaf("");
