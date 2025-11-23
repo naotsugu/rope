@@ -1,12 +1,32 @@
+/*
+ * Copyright 2025-2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.mammb.code.rope;
 
 import com.mammb.code.rope.Node.Branch;
 
 interface Balance {
 
-    Node apply(Node node);
-
     static Balance empty() { return node -> node; }
+
+    /**
+     * Apply balancing strategy.
+     * @param node the node
+     * @return balanced node
+     */
+    Node apply(Node node);
 
     static Balance weightBased() {
 
@@ -28,7 +48,7 @@ interface Balance {
 
                 // Left-heavy case (needs Right rotation)
                 if (leftRatio > 0.618) {
-                    // L-R case (Double rotation)
+                    // L-R case (double rotation)
                     if (node.left() instanceof Branch left &&
                         left.right().totalLength() > left.left().totalLength()) {
                         Node newLeft = rotateLeft(left);
@@ -68,6 +88,7 @@ interface Balance {
     }
 
     /**
+     * Rotate right.
      * <pre>
      *      P          Q
      *     / \        / \
@@ -89,6 +110,7 @@ interface Balance {
     }
 
     /**
+     * Rotate left.
      * <pre>
      *      P            Q
      *     / \          / \

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2025-2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.mammb.code.rope;
 
 import com.mammb.code.rope.Node.Branch;
@@ -19,7 +34,11 @@ public class Rope {
     }
 
     public Rope(String text) {
-        this.root = (text == null || text.isEmpty()) ? Node.EMPTY : new Node.Leaf(text);
+        this.root = Node.of(text);
+    }
+
+    public Rope(CharSequence text) {
+        this.root = Node.of(text);
     }
 
     public Rope insert(int index, String str) {
@@ -102,20 +121,17 @@ public class Rope {
         //     leaf           leftPart    rightPart
         String leftText  = leaf.text().substring(0, index);
         String rightText = leaf.text().substring(index);
-
-        Node leftPart  = leftText.isEmpty()  ? Node.EMPTY : new Leaf(leftText);
-        Node rightPart = rightText.isEmpty() ? Node.EMPTY : new Leaf(rightText);
-        return new Node[] { leftPart, rightPart };
+        return new Node[] { Node.of(leftText), Node.of(rightText) };
     }
 
     private Node[] splitNode(Branch node, int index) {
 
-        if (index < node.length()) {
+        if (index < node.weight()) {
 
             //      A        ->        A       /
             //    /   \              /   \    /
-            //   B   node           B   node /         ->               rightPart
-            //       /   \               /  /    \                       /  \
+            //   B   node           B   node /         ->              rightPart
+            //       /   \               /  /    \             D         /  \
             //      D     E             D  /      E         leftPart    G    E
             //     / \   / \          /   /   \   / \         /             / \
             //     F  G  H  I        F   /     G  H  I       F              H  I
@@ -134,13 +150,13 @@ public class Rope {
             //      A        ->        A
             //    /   \              /   \
             //   B     C            B     C       /    ->      leftPart
-            //       /   \              /   \    /               /  \
+            //       /   \              /   \    /               /  \        E
             //      D     E            D        /   E           D    H    rightPart
             //     / \   / \          / \   /  /     \         / \            \
             //     F  G  H  I        F   G  H /       I       F   G            I
 
             // split point is in the right subtree
-            int rightIndex = index - node.length();
+            int rightIndex = index - node.weight();
             Node[] rightSplit = splitNode(node.right(), rightIndex);
 
             // new left part: original left (shared) + split-left-of-right
