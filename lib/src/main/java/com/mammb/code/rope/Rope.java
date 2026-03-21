@@ -136,7 +136,7 @@ public class Rope {
             //     / \   / \          /   /   \   / \         /             / \
             //     F  G  H  I        F   /     G  H  I       F              H  I
 
-            // split point is in the left subtree
+            // the split point is in the left subtree
             Node[] leftSplit = splitNode(node.left(), index);
 
             Node leftPart = leftSplit[0];
@@ -155,7 +155,7 @@ public class Rope {
             //     / \   / \          / \   /  /     \         / \            \
             //     F  G  H  I        F   G  H /       I       F   G            I
 
-            // split point is in the right subtree
+            // the split point is in the right subtree
             int rightIndex = index - node.weight();
             Node[] rightSplit = splitNode(node.right(), rightIndex);
 
@@ -185,6 +185,10 @@ public class Rope {
                 inOrderTraversal(branch.right(), sb);
             }
         }
+    }
+
+    Node root() {
+        return root;
     }
 
 }
