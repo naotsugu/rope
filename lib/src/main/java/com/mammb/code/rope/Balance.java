@@ -22,7 +22,7 @@ interface Balance {
     static Balance empty() { return node -> node; }
 
     /**
-     * Apply balancing strategy.
+     * Apply a balancing strategy.
      * @param node the node
      * @return balanced node
      */
@@ -30,8 +30,8 @@ interface Balance {
 
     static Balance weightBased() {
 
-        return new Balance() {
 
+        return new Balance() {
             @Override
             public Node apply(Node node) {
                 return switch (node) {
